@@ -76,6 +76,9 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
     // Liquid Response (SSE streaming with live leader upgrades)
     stream = true,  // ON by default — serve first good response, upgrade live
     liquid_min_delta = 8, // Min score improvement to trigger a leader upgrade (1-50)
+    // Cost-aware escalation (default 5; set 0 to keep the legacy full-parallel race)
+    escalation_batch_size = 5,
+    escalation_threshold = 75,
     // Dataset opt-in
     contribute_to_dataset = false,
   } = req.body || {}
@@ -277,6 +280,8 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
           minResults: Math.min(5, models.length),
           gracePeriod: 5000,
           hardTimeout: 45000,
+          escalationBatchSize: Math.max(0, Number(escalation_batch_size) || 0) || 1,
+          escalationThreshold: Math.max(1, Math.min(100, Number(escalation_threshold) || 75)),
           onResult: (result) => {
             modelsResponded++
             const scored: ModelResult = {
@@ -478,6 +483,8 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
         minResults: Math.min(5, models.length),
         gracePeriod: 5000,
         hardTimeout: 45000,
+        escalationBatchSize: Math.max(0, Number(escalation_batch_size) || 0) || 1,
+        escalationThreshold: Math.max(1, Math.min(100, Number(escalation_threshold) || 75)),
       },
     )
 

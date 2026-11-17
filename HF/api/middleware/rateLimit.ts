@@ -18,6 +18,7 @@ interface RateBucket {
   totalRequests: number       // lifetime count (never resets)
   minuteRequests: number[]    // timestamps of requests in current window
   dayRequests: number[]
+  blocked?: boolean           // true once the lifetime cap is hit (bucket retained)
 }
 
 const TOTAL_LIMIT = parseInt(process.env.RATE_LIMIT_TOTAL || '5', 10)
@@ -35,7 +36,10 @@ setInterval(() => {
   for (const [key, bucket] of buckets) {
     bucket.minuteRequests = bucket.minuteRequests.filter(t => now - t < MINUTE_MS)
     bucket.dayRequests = bucket.dayRequests.filter(t => now - t < DAY_MS)
-    // Don't delete buckets that still have a total count — they need to stay blocked
+    // Reclaim inactive buckets. Buckets that hit the lifetime cap stay blocked.
+    if (!bucket.blocked && bucket.minuteRequests.length === 0 && bucket.dayRequests.length === 0) {
+      buckets.delete(key)
+    }
   }
 }, 10 * 60 * 1000).unref()
 
@@ -51,6 +55,7 @@ export function rateLimit(req: Request, res: Response, next: NextFunction): void
 
   // ── Check lifetime total cap (hard cutoff) ──────────────────────
   if (TOTAL_LIMIT > 0 && bucket.totalRequests >= TOTAL_LIMIT) {
+    bucket.blocked = true // retain bucket so the cap stays enforced
     res.status(429).json({
       error: 'Request limit reached for this API key',
       limit: TOTAL_LIMIT,

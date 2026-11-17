@@ -59,28 +59,28 @@ export const ULTRAPLINIAN_MODELS = {
     'perplexity/sonar',                                 // Web-grounded answers
     'meta-llama/llama-3.1-8b-instruct',                 // Lightweight speed option
     'moonshotai/kimi-k2.5',                             // Native multimodal
-    'x-ai/grok-code-fast-1',                            // Fast coding model
-    'xiaomi/mimo-v2-flash',                              // MiMo-V2 Flash, 309B MoE, #1 open-source
+    'x-ai/grok-4.6',                            // Fast coding model
+    'xiaomi/mimo-v2.6-flash',                              // MiMo-V2 Flash, 309B MoE, #1 open-source
     'openai/gpt-oss-20b',                               // Lightweight open-weight
-    'stepfun/step-3.5-flash',                           // Fast open MoE, 196B
+    'stepfun/step-3.7-flash',                           // Fast open MoE, 196B
     'google/gemini-3.1-flash-lite',                     // Google's fastest model, 1M ctx
     'mistralai/mistral-small-3.2-24b-instruct',         // Fast updated Mistral Small
     'nvidia/nemotron-3-nano-30b-a3b',                   // NVIDIA agentic MoE, 262K ctx
   ],
   // 🎯 STANDARD TIER (+15 models = 27 cumulative): Mid-range workhorses
   standard: [
-    'anthropic/claude-3.5-sonnet',                      // Reliable workhorse
+    'anthropic/claude-sonnet-4.6',                      // Reliable workhorse
     'meta-llama/llama-4-scout',                         // Efficient Meta model
     'deepseek/deepseek-v3.2',                           // GPT-5 class, dirt cheap
-    'nousresearch/hermes-3-llama-3.1-70b',              // Classic uncensored 70B
+    'nousresearch/hermes-4-405b',              // Classic uncensored 70B
     'openai/gpt-4o',                                    // Reliable workhorse
     'google/gemini-2.5-pro',                            // Strong reasoning + coding
-    'anthropic/claude-sonnet-4',                        // Strong and reliable
+    'anthropic/claude-sonnet-4.6',                        // Strong and reliable
     'anthropic/claude-sonnet-4.6',                      // Best balance of speed + quality
     'mistralai/mixtral-8x22b-instruct',                 // European MoE powerhouse
     'meta-llama/llama-3.3-70b-instruct',                // Solid all-rounder
     'qwen/qwen-2.5-72b-instruct',                      // Strong open model
-    'nousresearch/hermes-4-70b',                        // Uncensored champion
+    'nousresearch/hermes-4-405b',                        // Uncensored champion
     'mistralai/mistral-medium-3.1',                     // Balanced Mistral model
     'z-ai/glm-5-turbo',                                 // GLM 5 Turbo, fast agentic inference
     'google/gemini-3-flash-preview',                    // Fast agentic model
@@ -89,42 +89,42 @@ export const ULTRAPLINIAN_MODELS = {
   // 🧠 SMART TIER (+12 models = 39 cumulative): Flagships and heavy hitters
   smart: [
     'openai/gpt-5',                                     // OpenAI flagship
-    'openai/gpt-5.3-chat',                              // Latest non-reasoning flagship
+    'openai/gpt-5.6-luna',                              // Latest non-reasoning flagship
     'qwen/qwen3.5-plus-02-15',                          // Latest Qwen flagship
     'z-ai/glm-5',                                       // Strong coding + agent tasks
     'openai/gpt-5.2',                                   // #1 on benchmarks
-    'google/gemini-3-pro-preview',                      // Frontier multimodal reasoning
+    'google/gemini-3.1-pro-preview',                      // Frontier multimodal reasoning
     'anthropic/claude-opus-4.6',                        // Latest flagship
     'openai/gpt-oss-120b',                              // Open-weight Apache 2.0
-    'deepseek/deepseek-r1',                             // Strong reasoning
-    'meta-llama/llama-3.1-405b-instruct',               // Largest open model
+    'deepseek/deepseek-v4.1-flash',                             // Strong reasoning
+    'meta-llama/llama-4-maverick',               // Largest open model
     'nousresearch/hermes-4-405b',                       // Uncensored 405B
-    'nousresearch/hermes-3-llama-3.1-405b',             // Uncensored 405B legacy
+    'nousresearch/hermes-4-405b',             // Uncensored 405B legacy
     'nvidia/nemotron-3-super-120b-a12b',                // Nemotron 3 Super, hybrid Mamba 1M ctx
   ],
   // ⚔️ POWER TIER (+10 models = 49 cumulative): Frontier, cutting-edge
   power: [
-    'x-ai/grok-4',                                      // Frontier reasoning
+    'x-ai/grok-4.7',                                      // Frontier reasoning
     'openai/gpt-5.4',                                   // Unified Codex+GPT, 1M ctx, computer use
     'z-ai/glm-4.7',                                     // Strong coding, uncensored
     'meta-llama/llama-4-maverick',                      // Latest Meta flagship
-    'qwen/qwen3-235b-a22b',                             // Powerful MoE
+    'qwen/qwen3.8-max-prime',                             // Powerful MoE
     'qwen/qwen3-coder',                                 // Frontier agentic coding MoE
     'minimax/minimax-m2.5',                             // SWE-Bench 80.2%, agentic
     'mistralai/mistral-large-2512',                     // Mistral Large 3, 675B MoE
     'google/gemini-3.1-pro-preview',                    // Frontier SWE + reasoning, 1M ctx
     'moonshotai/kimi-k2',                               // 1T MoE instruct, tool-use
-    'xiaomi/mimo-v2-pro',                               // MiMo-V2 Pro, 1T flagship, #1 Programming
+    'xiaomi/mimo-v2.6-pro',                               // MiMo-V2 Pro, 1T flagship, #1 Programming
   ],
   // 🔱 ULTRA TIER (+7 models = 56 cumulative): Maximum coverage
   ultra: [
-    'x-ai/grok-4-fast',                                 // Balanced speed + reasoning
-    'x-ai/grok-4.1-fast',                               // Fast non-reasoning, 1.8M ctx
-    'anthropic/claude-opus-4',                          // Previous flagship
+    'x-ai/grok-4.6',                                 // Balanced speed + reasoning
+    'x-ai/grok-4.6',                               // Fast non-reasoning, 1.8M ctx
+    'anthropic/claude-opus-5',                          // Previous flagship
     'qwen/qwen-2.5-coder-32b-instruct',                // Strong coding model
-    'qwen/qwq-32b',                                    // Reasoning model
+    'qwen/qwen3.8-27b',                                    // Reasoning model
     'mistralai/codestral-2508',                         // Latest Codestral, 256K ctx coding
-    'mistralai/devstral-medium',                        // Agentic coding, 131K ctx
+    'mistralai/codestral-2508',                        // Agentic coding, 131K ctx
   ],
 }
 
@@ -228,6 +228,16 @@ interface RaceConfig {
   hardTimeout?: number
   /** Called when each model finishes (scored result). Enables live streaming. */
   onResult?: (result: ModelResult) => void
+  /**
+   * Cost-aware escalation. Instead of launching the whole tier within ~600ms
+   * (which bills every model even when early-stop saves latency), launch
+   * `escalationBatchSize` models at a time and only escalate when no result
+   * clears `escalationThreshold`. Set to 1 to keep the legacy full-parallel
+   * behavior. Default: 5.
+   */
+  escalationBatchSize?: number
+  /** Minimum score that stops escalation early (default: 75). */
+  escalationThreshold?: number
 }
 
 /**
@@ -262,6 +272,8 @@ export function raceModels(
   const minResults = config.minResults ?? 5
   const gracePeriod = config.gracePeriod ?? 5000
   const hardTimeout = config.hardTimeout ?? 45000
+  const batchSize = Math.max(1, config.escalationBatchSize ?? 5)
+  const threshold = config.escalationThreshold ?? 75
 
   return new Promise(resolve => {
     const results: ModelResult[] = []
@@ -269,6 +281,7 @@ export function raceModels(
     let settled = 0
     let graceTimer: ReturnType<typeof setTimeout> | null = null
     let resolved = false
+    let nextBatchTimer: ReturnType<typeof setTimeout> | null = null
 
     const controller = new AbortController()
 
@@ -278,6 +291,7 @@ export function raceModels(
       controller.abort()
       if (graceTimer) clearTimeout(graceTimer)
       if (hardTimer) clearTimeout(hardTimer)
+      if (nextBatchTimer) clearTimeout(nextBatchTimer)
       resolve(results)
     }
 
@@ -309,23 +323,44 @@ export function raceModels(
             graceTimer = setTimeout(finish, gracePeriod)
           }
 
-          // All models done — no need to wait
-          if (settled === models.length) {
-            finish()
+          if (batchSize === 1) {
+            // Legacy full-parallel: all models were launched up front.
+            if (settled === models.length) finish()
+          } else {
+            // Cost-aware: decide whether to escalate after each batch settles.
+            const launched = Math.min(batchCursor, models.length)
+            if (settled === launched) {
+              const bestSoFar = results.reduce((m, r) => Math.max(m, r.score), 0)
+              const enough = successCount >= minResults || bestSoFar >= threshold
+              if (enough || launched >= models.length) {
+                finish()
+              } else {
+                nextBatchTimer = setTimeout(launchBatch, 100)
+              }
+            }
           }
         })
     }
 
-    for (let i = 0; i < models.length; i++) {
-      const waveIndex = Math.floor(i / WAVE_SIZE)
-      const delay = waveIndex * WAVE_DELAY_MS
-      if (delay === 0) {
-        launchModel(models[i])
-      } else {
-        setTimeout(() => {
-          if (!resolved) launchModel(models[i])
-        }, delay)
+    // ── Launch strategy ──────────────────────────────────────────────
+    let batchCursor = 0
+    const launchBatch = () => {
+      if (resolved || batchCursor >= models.length) return
+      const end = Math.min(batchCursor + batchSize, models.length)
+      for (let i = batchCursor; i < end; i++) launchModel(models[i])
+      batchCursor = end
+    }
+
+    if (batchSize === 1) {
+      // Legacy: stagger 12-at-a-time to avoid provider rate limits (~600ms for 59).
+      for (let i = 0; i < models.length; i++) {
+        const delay = Math.floor(i / WAVE_SIZE) * WAVE_DELAY_MS
+        if (delay === 0) launchModel(models[i])
+        else setTimeout(() => { if (!resolved) launchModel(models[i]) }, delay)
       }
+      batchCursor = models.length
+    } else {
+      launchBatch()
     }
 
     // Edge case: no models
