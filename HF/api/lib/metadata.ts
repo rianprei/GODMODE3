@@ -35,13 +35,17 @@ export interface MetadataEvent {
   stream: boolean
 
   // Pipeline config (what was enabled, not what it produced)
-  pipeline: {
+  // Optional: not available when recording from early error handlers.
+  pipeline?: {
     godmode: boolean
     autotune: boolean
     parseltongue: boolean
     stm_modules: string[]
     strategy?: string
   }
+
+  // Top-level error category (internal_error, etc.) for error-mode events
+  error_type?: string
 
   // AutoTune metadata (context detection only, no content)
   autotune?: {
@@ -268,13 +272,13 @@ export function getStats(): MetadataStats {
     if (e.tier) byTier[e.tier] = (byTier[e.tier] || 0) + 1
     byEndpoint[e.endpoint] = (byEndpoint[e.endpoint] || 0) + 1
 
-    if (e.pipeline.godmode) godmodeCount++
-    if (e.pipeline.autotune) autotuneCount++
-    if (e.pipeline.parseltongue) parseltongueCount++
-    if (e.pipeline.strategy) {
+    if (e.pipeline?.godmode) godmodeCount++
+    if (e.pipeline?.autotune) autotuneCount++
+    if (e.pipeline?.parseltongue) parseltongueCount++
+    if (e.pipeline?.strategy) {
       strategyUsage[e.pipeline.strategy] = (strategyUsage[e.pipeline.strategy] || 0) + 1
     }
-    for (const mod of e.pipeline.stm_modules) {
+    for (const mod of e.pipeline?.stm_modules ?? []) {
       stmUsage[mod] = (stmUsage[mod] || 0) + 1
     }
 

@@ -21,9 +21,17 @@ interface RateBucket {
   blocked?: boolean           // true once the lifetime cap is hit (bucket retained)
 }
 
-const TOTAL_LIMIT = parseInt(process.env.RATE_LIMIT_TOTAL || '5', 10)
-const MINUTE_LIMIT = parseInt(process.env.RATE_LIMIT_PER_MINUTE || '60', 10)
-const DAY_LIMIT = parseInt(process.env.RATE_LIMIT_PER_DAY || '1000', 10)
+/** Invalid or negative env values must not silently disable enforcement (NaN >= n is false). */
+function parseLimitEnv(raw: string | undefined, fallback: number, min = 0): number {
+  if (raw === undefined || raw.trim() === '') return fallback
+  if (!/^\d+$/.test(raw.trim())) return fallback
+  const parsed = Number(raw.trim())
+  return Number.isSafeInteger(parsed) && parsed >= min ? parsed : fallback
+}
+
+const TOTAL_LIMIT = parseLimitEnv(process.env.RATE_LIMIT_TOTAL, 5)
+const MINUTE_LIMIT = parseLimitEnv(process.env.RATE_LIMIT_PER_MINUTE, 60, 1)
+const DAY_LIMIT = parseLimitEnv(process.env.RATE_LIMIT_PER_DAY, 1000, 1)
 const MINUTE_MS = 60 * 1000
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -72,7 +80,8 @@ export function rateLimit(req: Request, res: Response, next: NextFunction): void
 
   // ── Check per-minute limit ──────────────────────────────────────
   if (bucket.minuteRequests.length >= MINUTE_LIMIT) {
-    const retryAfter = Math.ceil((bucket.minuteRequests[0] + MINUTE_MS - now) / 1000)
+    const retryAfter = Math.max(1, Math.ceil((bucket.minuteRequests[0] + MINUTE_MS - now) / 1000))
+    res.setHeader('Retry-After', retryAfter)
     res.status(429).json({
       error: 'Rate limit exceeded (per-minute)',
       limit: MINUTE_LIMIT,
@@ -84,7 +93,8 @@ export function rateLimit(req: Request, res: Response, next: NextFunction): void
 
   // ── Check per-day limit ─────────────────────────────────────────
   if (bucket.dayRequests.length >= DAY_LIMIT) {
-    const retryAfter = Math.ceil((bucket.dayRequests[0] + DAY_MS - now) / 1000)
+    const retryAfter = Math.max(1, Math.ceil((bucket.dayRequests[0] + DAY_MS - now) / 1000))
+    res.setHeader('Retry-After', retryAfter)
     res.status(429).json({
       error: 'Rate limit exceeded (daily)',
       limit: DAY_LIMIT,

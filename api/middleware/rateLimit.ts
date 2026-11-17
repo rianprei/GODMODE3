@@ -56,6 +56,14 @@ export function rateLimit(req: Request, res: Response, next: NextFunction): void
   const MINUTE_LIMIT = tierConfig?.rateLimit.perMinute ?? parseInt(process.env.RATE_LIMIT_PER_MINUTE || '60', 10)
   const DAY_LIMIT = tierConfig?.rateLimit.perDay ?? parseInt(process.env.RATE_LIMIT_PER_DAY || '1000', 10)
 
+  // A malformed quota must never silently disable enforcement (NaN >= n is false).
+  if (!Number.isSafeInteger(TOTAL_LIMIT) || TOTAL_LIMIT < 0 ||
+      !Number.isSafeInteger(MINUTE_LIMIT) || MINUTE_LIMIT < 1 ||
+      !Number.isSafeInteger(DAY_LIMIT) || DAY_LIMIT < 1) {
+    res.status(503).json({ error: 'Rate limit configuration is invalid' })
+    return
+  }
+
   if (!buckets.has(keyId)) {
     buckets.set(keyId, { totalRequests: 0, minuteRequests: [], dayRequests: [] })
   }
@@ -86,7 +94,8 @@ export function rateLimit(req: Request, res: Response, next: NextFunction): void
 
   // ── Check per-minute limit ──────────────────────────────────────
   if (bucket.minuteRequests.length >= MINUTE_LIMIT) {
-    const retryAfter = Math.ceil((bucket.minuteRequests[0] + MINUTE_MS - now) / 1000)
+    const retryAfter = Math.max(1, Math.ceil((bucket.minuteRequests[0] + MINUTE_MS - now) / 1000))
+    res.setHeader('Retry-After', retryAfter)
     res.status(429).json({
       error: 'Rate limit exceeded (per-minute)',
       limit: MINUTE_LIMIT,
@@ -99,7 +108,8 @@ export function rateLimit(req: Request, res: Response, next: NextFunction): void
 
   // ── Check per-day limit ─────────────────────────────────────────
   if (bucket.dayRequests.length >= DAY_LIMIT) {
-    const retryAfter = Math.ceil((bucket.dayRequests[0] + DAY_MS - now) / 1000)
+    const retryAfter = Math.max(1, Math.ceil((bucket.dayRequests[0] + DAY_MS - now) / 1000))
+    res.setHeader('Retry-After', retryAfter)
     res.status(429).json({
       error: 'Rate limit exceeded (daily)',
       limit: DAY_LIMIT,
