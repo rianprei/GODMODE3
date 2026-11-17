@@ -20,6 +20,7 @@
  */
 
 import { randomUUID } from 'crypto'
+import type { AutoTuneParams } from '../../src/lib/autotune'
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -41,7 +42,7 @@ export interface DatasetEntry {
     strategy: string
     detected_context: string
     confidence: number
-    params: Record<string, number>
+    params: AutoTuneParams
     reasoning: string
   }
 
@@ -122,7 +123,7 @@ export function deleteEntry(id: string): boolean {
 }
 
 export function getDataset(): DatasetEntry[] {
-  return dataset
+  return [...dataset]
 }
 
 export function getDatasetStats(): {

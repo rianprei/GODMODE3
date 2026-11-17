@@ -19,6 +19,7 @@ import {
 } from '../../src/lib/autotune-feedback'
 import type { ContextType, AutoTuneParams } from '../../src/lib/autotune'
 import { updateSharedProfiles } from './autotune'
+import { addFeedbackToEntry } from '../lib/dataset'
 
 export const feedbackRoutes = Router()
 
@@ -84,11 +85,22 @@ feedbackRoutes.post('/', (req, res) => {
     // Sync learned profiles to the AutoTune route
     updateSharedProfiles(feedbackState.learnedProfiles)
 
+    // If the caller passed a dataset entry id as message_id, attach the rating to it
+    const datasetLinked = addFeedbackToEntry(message_id, {
+      rating,
+      heuristics: {
+        response_length: heuristics.responseLength,
+        repetition_score: heuristics.repetitionScore,
+        vocabulary_diversity: heuristics.vocabularyDiversity,
+      },
+    })
+
     res.json({
       accepted: true,
       total_feedback: feedbackState.history.length,
       context_type,
-      learned: feedbackState.learnedProfiles[context_type].sampleCount >= 3,
+      learned: feedbackState.learnedProfiles[context_type as ContextType].sampleCount >= 3,
+      dataset_linked: datasetLinked,
     })
   } catch (err: any) {
     console.error('[feedback]', err)

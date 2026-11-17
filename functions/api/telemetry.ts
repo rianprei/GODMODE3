@@ -25,6 +25,19 @@ interface Env {
   HF_DATASET_BRANCH?: string
 }
 
+/**
+ * Minimal local stand-in for the Cloudflare `PagesFunction` global type.
+ * Declared here so the file type-checks without pulling in @cloudflare/workers-types.
+ */
+interface PagesFunctionContext<Env> {
+  request: Request
+  env: Env
+  waitUntil(promise: Promise<unknown>): void
+  passThroughOnException(): void
+}
+
+type PagesFunction<Env = unknown> = (context: PagesFunctionContext<Env>) => Promise<Response> | Response
+
 interface TelemetryEvent {
   type: string
   timestamp: number

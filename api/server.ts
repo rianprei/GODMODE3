@@ -27,7 +27,7 @@ import { datasetRoutes } from './routes/dataset'
 import { metadataRoutes } from './routes/metadata'
 import { researchRoutes } from './routes/research'
 import { isPublisherEnabled, startPeriodicFlush, shutdownFlush, getPublisherStatus } from './lib/hf-publisher'
-import { TIER_CONFIGS } from './lib/tiers'
+import { TIER_CONFIGS, getTierConfig } from './lib/tiers'
 import { ULTRAPLINIAN_MODELS } from './lib/ultraplinian'
 import type { TierConfig } from './lib/tiers'
 
@@ -141,7 +141,9 @@ app.get('/v1/models', (_req, res) => {
   const allModels = [
     ...ULTRAPLINIAN_MODELS.fast,
     ...ULTRAPLINIAN_MODELS.standard,
-    ...ULTRAPLINIAN_MODELS.full,
+    ...ULTRAPLINIAN_MODELS.smart,
+    ...ULTRAPLINIAN_MODELS.power,
+    ...ULTRAPLINIAN_MODELS.ultra,
   ]
 
   const created = Math.floor(Date.now() / 1000)
@@ -185,7 +187,7 @@ app.get('/v1/models', (_req, res) => {
 // ── Tier Info Endpoint (authenticated) ────────────────────────────────
 app.get('/v1/tier', apiKeyAuth, (req, res) => {
   const tier = req.tier || 'free'
-  const config: TierConfig = req.tierConfig
+  const config: TierConfig = req.tierConfig || getTierConfig(tier)
   res.json({
     tier: config.name,
     label: config.label,
@@ -216,7 +218,7 @@ app.use('/v1/feedback', apiKeyAuth, rateLimit, feedbackRoutes)
 
 // ── Gated routes ──────────────────────────────────────────────────────
 // Dataset: Pro+ for export, stats accessible by all
-app.use('/v1/dataset', apiKeyAuth, rateLimit, tierGate('dataset:export'), datasetRoutes)
+app.use('/v1/dataset', apiKeyAuth, rateLimit, datasetRoutes)
 
 // Metadata: stats open to all auth'd users, events gated to Enterprise
 app.use('/v1/metadata', apiKeyAuth, metadataRoutes) // individual route-level gating in metadata routes
@@ -236,7 +238,10 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 })
 
 // ── Start ─────────────────────────────────────────────────────────────
-app.listen(PORT, '0.0.0.0', () => {
+// Only listen when executed directly. Importing this module (tests, tooling)
+// must not bind a port or leave an open handle.
+export function startServer(port: number = PORT) {
+  return app.listen(port, '0.0.0.0', () => {
   const hfStatus = isPublisherEnabled()
     ? `ON → ${process.env.HF_DATASET_REPO}`
     : 'OFF (set HF_TOKEN + HF_DATASET_REPO to enable)'
@@ -296,7 +301,13 @@ app.listen(PORT, '0.0.0.0', () => {
 
   // Start periodic HF flush (no-op if not configured)
   startPeriodicFlush()
-})
+  })
+}
+
+// Auto-start when run as the main module (e.g. `tsx api/server.ts`).
+if (require.main === module) {
+  startServer()
+}
 
 // ── Graceful Shutdown ─────────────────────────────────────────────────
 // Flush remaining metadata/dataset to HF before the container dies

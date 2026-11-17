@@ -48,37 +48,43 @@ export const ultraplinianRoutes = Router()
 ultraplinianRoutes.post('/completions', async (req, res) => {
   const startTime = Date.now()
 
+  // Destructured outside the try so the catch block can still report pipeline state.
+  const {
+    messages,
+    openrouter_api_key: caller_key,
+    // ULTRAPLINIAN options
+    tier = 'fast' as SpeedTier,
+    godmode = true,
+    custom_system_prompt,
+    // AutoTune options
+    autotune = true,
+    strategy = 'adaptive',
+    // Parseltongue options
+    parseltongue = true,
+    parseltongue_technique = 'leetspeak',
+    parseltongue_intensity = 'medium',
+    // STM options
+    stm_modules = ['hedge_reducer', 'direct_mode'],
+    // Param overrides
+    temperature,
+    max_tokens = 4096,
+    top_p,
+    top_k,
+    frequency_penalty,
+    presence_penalty,
+    repetition_penalty,
+    // Liquid Response (SSE streaming with live leader upgrades)
+    stream = true,  // ON by default — serve first good response, upgrade live
+    liquid_min_delta = 8, // Min score improvement to trigger a leader upgrade (1-50)
+    // Dataset opt-in
+    contribute_to_dataset = false,
+  } = req.body || {}
+
+  // Hoisted for the catch block below.
+  let autotuneResult: any = null
+  let parseltongueResult: any = null
+
   try {
-    const {
-      messages,
-      openrouter_api_key: caller_key,
-      // ULTRAPLINIAN options
-      tier = 'fast' as SpeedTier,
-      godmode = true,
-      custom_system_prompt,
-      // AutoTune options
-      autotune = true,
-      strategy = 'adaptive',
-      // Parseltongue options
-      parseltongue = true,
-      parseltongue_technique = 'leetspeak',
-      parseltongue_intensity = 'medium',
-      // STM options
-      stm_modules = ['hedge_reducer', 'direct_mode'],
-      // Param overrides
-      temperature,
-      max_tokens = 4096,
-      top_p,
-      top_k,
-      frequency_penalty,
-      presence_penalty,
-      repetition_penalty,
-      // Liquid Response (SSE streaming with live leader upgrades)
-      stream = true,  // ON by default — serve first good response, upgrade live
-      liquid_min_delta = 8, // Min score improvement to trigger a leader upgrade (1-50)
-      // Dataset opt-in
-      contribute_to_dataset = false,
-    } = req.body
 
     // Validate
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -148,7 +154,6 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
       .filter(m => m.role !== 'system')
       .map(m => ({ role: m.role, content: m.content }))
 
-    let autotuneResult = null
     let finalParams: Record<string, number | undefined> = {
       temperature: temperature ?? 0.7,
       top_p,
@@ -189,7 +194,6 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
     }
 
     // ── Parseltongue ─────────────────────────────────────────────────
-    let parseltongueResult = null
     let processedMessages = baseMessages
 
     if (parseltongue) {
@@ -217,7 +221,7 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
     }
 
     // ── Shared race setup ────────────────────────────────────────────
-    const models = getModelsForTier(tier)
+    const models = getModelsForTier(tier).slice(0, tierConfig?.maxRaceModels ?? undefined)
     const raceParams = {
       temperature: finalParams.temperature,
       max_tokens,
@@ -504,6 +508,13 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
         mode: 'ultraplinian-failed',
         tier,
         stream,
+        pipeline: {
+          godmode,
+          autotune: !!autotuneResult,
+          parseltongue: !!parseltongueResult,
+          stm_modules: stm_modules || [],
+          strategy,
+        },
         models_queried: models.length,
         models_succeeded: scoredResults.filter(r => r.success).length,
         model_results: scoredResults.map(r => ({
@@ -512,6 +523,7 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
           error_type: r.error ? categorizeError(r.error) : undefined,
         })),
         total_duration_ms: Date.now() - startTime,
+        response_length: 0,
       })
       res.status(502).json({
         error: 'All models failed in ULTRAPLINIAN mode',
@@ -631,8 +643,17 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
     recordEvent({
       endpoint: '/v1/ultraplinian/completions',
       mode: 'ultraplinian-error',
-      error_type: 'internal_error',
+      tier,
+      stream,
+      pipeline: {
+        godmode,
+        autotune: !!autotuneResult,
+        parseltongue: !!parseltongueResult,
+        stm_modules: stm_modules || [],
+        strategy,
+      },
       total_duration_ms: Date.now() - startTime,
+      response_length: 0,
     })
     if (stream) {
       try {

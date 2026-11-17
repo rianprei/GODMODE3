@@ -37,7 +37,7 @@ setInterval(() => {
     bucket.dayRequests = bucket.dayRequests.filter(t => now - t < DAY_MS)
     // Don't delete buckets that still have a total count — they need to stay blocked
   }
-}, 10 * 60 * 1000)
+}, 10 * 60 * 1000).unref()
 
 export function rateLimit(req: Request, res: Response, next: NextFunction): void {
   const keyId = (req as any).apiKeyId || 'unknown'

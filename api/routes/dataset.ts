@@ -20,6 +20,17 @@ datasetRoutes.get('/export', (req, res) => {
   const dataset = getDataset()
 
   if (format === 'jsonl') {
+    // JSONL is a Pro+ format — free tier only gets the standard JSON array.
+    if (req.tierConfig && !req.tierConfig.datasetExportFormats.includes('jsonl')) {
+      res.status(403).json({
+        error: 'Upgrade required',
+        message: `JSONL dataset export requires a higher plan. Your "${req.tier || 'free'}" plan allows: ${req.tierConfig.datasetExportFormats.join(', ') || 'json only'}.`,
+        current_tier: req.tier || 'free',
+        required_tier: 'pro',
+        feature: 'dataset:jsonl',
+      })
+      return
+    }
     // JSONL format — one JSON object per line, ideal for HF Datasets
     res.setHeader('Content-Type', 'application/x-ndjson')
     res.setHeader('Content-Disposition', 'attachment; filename="g0dm0d3-dataset.jsonl"')

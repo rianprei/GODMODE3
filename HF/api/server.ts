@@ -137,7 +137,10 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 })
 
 // ── Start ─────────────────────────────────────────────────────────────
-app.listen(PORT, '0.0.0.0', () => {
+// Only listen when executed directly. Importing this module (tests, tooling)
+// must not bind a port or leave an open handle.
+export function startServer(port: number = PORT) {
+  return app.listen(port, '0.0.0.0', () => {
   console.log(`
   ╔══════════════════════════════════════════════════════════╗
   ║  G0DM0D3 API v0.4.0 — OpenAI-Compatible                 ║
@@ -163,6 +166,12 @@ app.listen(PORT, '0.0.0.0', () => {
   ║  c.chat.completions.create(model="ultraplinian", ...)    ║
   ╚══════════════════════════════════════════════════════════╝
   `)
-})
+  })
+}
+
+// Auto-start when run as the main module (e.g. `tsx api/server.ts`).
+if (require.main === module) {
+  startServer()
+}
 
 export default app

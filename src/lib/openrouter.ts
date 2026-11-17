@@ -153,11 +153,11 @@ export async function sendMessage({
   })
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
+    const errorData = await response.json().catch(() => ({})) as { error?: { message?: string } }
     throw new Error(formatAPIError(response.status, errorData.error?.message))
   }
 
-  const data: OpenRouterResponse = await response.json()
+  const data: OpenRouterResponse = await response.json() as OpenRouterResponse
 
   if (!data.choices || data.choices.length === 0) {
     throw new Error('No response from model')
@@ -215,7 +215,7 @@ export async function* streamMessage({
   })
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
+    const errorData = await response.json().catch(() => ({})) as { error?: { message?: string } }
     throw new Error(formatAPIError(response.status, errorData.error?.message))
   }
 
@@ -273,7 +273,7 @@ export async function getModels(apiKey: string): Promise<string[]> {
     throw new Error('Failed to fetch models')
   }
 
-  const data = await response.json()
+  const data = await response.json() as { data: Array<{ id: string }> }
   return data.data.map((model: { id: string }) => model.id)
 }
 
@@ -355,12 +355,12 @@ export async function sendMessageViaProxy({
   })
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
-    const errorMessage = (errorData as any).error?.message || (errorData as any).error || `API error: ${response.status}`
+    const errorData = await response.json().catch(() => ({})) as { error?: { message?: string } | string }
+    const errorMessage = (typeof errorData.error === 'string' ? errorData.error : errorData.error?.message) || `API error: ${response.status}`
     throw new Error(errorMessage)
   }
 
-  const data = await response.json()
+  const data = await response.json() as OpenRouterResponse
 
   if (!data.choices || data.choices.length === 0) {
     throw new Error('No response from model')
@@ -472,8 +472,8 @@ export async function streamConsortium(
   })
 
   if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(formatAPIError(response.status, err.error))
+    const err = await response.json().catch(() => ({})) as { error?: { message?: string } }
+    throw new Error(formatAPIError(response.status, err.error?.message))
   }
 
   const reader = response.body?.getReader()
@@ -635,8 +635,8 @@ export async function streamUltraplinian(
   })
 
   if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(formatAPIError(response.status, err.error))
+    const err = await response.json().catch(() => ({})) as { error?: { message?: string } }
+    throw new Error(formatAPIError(response.status, err.error?.message))
   }
 
   const reader = response.body?.getReader()

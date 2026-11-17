@@ -43,7 +43,7 @@ setInterval(() => {
       buckets.delete(key)
     }
   }
-}, 10 * 60 * 1000)
+}, 10 * 60 * 1000).unref()
 
 export function rateLimit(req: Request, res: Response, next: NextFunction): void {
   const keyId = req.apiKeyId || 'unknown'
