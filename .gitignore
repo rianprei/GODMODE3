@@ -5,3 +5,6 @@ node_modules/
 .wrangler/
 dist/
 tsconfig.tsbuildinfo
+
+# Local analysis artifacts (fork scans, reports)
+.analysis/
